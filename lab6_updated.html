@@ -1,0 +1,254 @@
+<html>
+  <head>
+    <title>Lab 6 - More on JS</title>
+    <style>
+             .overlay {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-size: 14px;
+            text-shadow: 1px 1px 1px black;
+            animation: moveTrackInfo 5s infinite alternate; 
+        }
+
+        @keyframes moveTrackInfo {
+            0% {
+                left: 0; 
+            }
+            100% {
+                left: calc(100% - 200px); 
+            }
+        }
+				button{
+					margin-right: 4px;
+					width: 30px;
+					border: none;
+					background: none;
+				}
+				button,progress:hover{
+					cursor: pointer;
+				}
+				table{
+					border: 4px solid;
+					border-color: rgb(211, 155, 77);
+					border-radius: 5px;
+					margin: auto;
+					margin-top: 100px;
+
+				}
+				body{
+					background-image: url('bgimage.jpg');
+					background-size: cover;
+					background-position: center;
+				}
+				table image{
+					background-size: cover;
+					background-position: center;
+				}
+				caption{
+					color: orange;
+					font-family: algerian;
+					font-size: 40px;
+				}
+				
+				
+				
+    </style>
+  </head>
+  <body id='pageBody'>
+	<audio style="display: none;" id="musicPlayer" src="" controls >
+	</audio>
+	<!--<button onclick="playMusic();">Play</button>
+	<button onclick="pauseMusic();">Pause</button>
+	<button id="btnLightDark" onclick="lightDark();">Dark</button>-->
+	<table >
+		<caption>Music player</caption>
+		<tr>
+			<td>
+				<div style="position: relative;">
+					<img id="imgMusic" src="madingo.png" width="300" />
+					<div class="overlay" id="trackInfo"></div>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td align="center">
+				<progress id="progressBar" max="100" value="0"></progress><br>
+				
+			   <button id="btnPrev" onclick="prevMusic();" >&#x23EE;</button>
+				 <button id="btnPlayPause" onclick="playPauseMusic();">&#x25B7;</button>
+				<button id="btnNext" onclick="nextMusic();">&#x23ED;</button>
+				<button id="btnRepeat" onclick="toggleRepeat();">&#x1F501;</button>
+				<button id="btnVolumeDown" onclick="decreaseVolume();">&#x1F509;</button>
+				<button id="btnVolumeUp" onclick="increaseVolume();">&#x1F50A;</button>
+      
+			 <button id="btnMute" onclick="toggleMute();">&#x1F508;</button>
+
+
+
+			  
+		</tr>
+	</table>
+    <script>
+		let tracker = 0;
+		let track_1 = {title: "keteleyayen", artist: "madingo", artwork: "madingo.png", url: "madinego (1).mp3"};
+		let track_2 = {title: "mamene", artist: "bzuayehu", artwork: "bzuayehu1.png", url: "Track01.mp3"};
+		let tracks = [track_1,track_2];
+		
+		let isPlaying = false;
+
+function playPauseMusic(){
+    let musicPlayer = document.getElementById('musicPlayer');
+    let btnPlayPause = document.getElementById('btnPlayPause');
+    let trackInfo = document.getElementById('trackInfo');
+
+    if(!isPlaying){
+        musicPlayer.src = tracks[tracker].url;
+        musicPlayer.play();
+        btnPlayPause.innerHTML = "&#x23F8;"; 
+        
+        trackInfo.innerHTML = tracks[tracker].title + " - " + tracks[tracker].artist;
+        isPlaying = true;
+    } else {
+        musicPlayer.pause();
+        btnPlayPause.innerHTML = "&#x25B7;"; 
+        isPlaying = false;
+    }
+}
+
+
+		function prevMusic(){
+			tracker--;
+			if(tracker < 0) tracker = tracks.length - 1;
+			updateTrackInfo();
+		}
+		function nextMusic(){
+			tracker++;
+			if(tracker >= tracks.length) tracker = 0;
+			updateTrackInfo();
+		}
+
+		function updateTrackInfo() {
+    let musicPlayer = document.getElementById('musicPlayer');
+    let imgMusic = document.getElementById('imgMusic');
+    let trackInfo = document.getElementById('trackInfo');
+    let btnPlayPause = document.getElementById('btnPlayPause');
+
+    musicPlayer.src = tracks[tracker].url;
+    imgMusic.src = tracks[tracker].artwork;
+    musicPlayer.play();
+    
+   
+    trackInfo.innerHTML = tracks[tracker].title + " - " + tracks[tracker].artist;
+    progressBar.max = musicPlayer.duration;
+		
+
+}
+
+
+		/*function lightDark(){
+			let body = document.getElementById('pageBody');
+			let btnLightDark = document.getElementById('btnLightDark');
+			if(btnLightDark.innerHTML == "Dark"){
+				body.style.background = "#000000";
+				body.style.color = "#ffffff";
+				btnLightDark.innerHTML = "Light"				
+			}
+			else{
+				body.style.background = "#ffffff";
+				body.style.color = "#000000";
+				btnLightDark.innerHTML = "Dark"				
+			}
+		}
+*/
+		musicPlayer.addEventListener('loadedmetadata', function() {
+        progressBar.max = musicPlayer.duration;
+    });
+
+    
+    musicPlayer.addEventListener('timeupdate', function() {
+        let currentTime = musicPlayer.currentTime;
+        progressBar.value = currentTime;
+    });
+
+   
+    progressBar.addEventListener('click', function(e) {
+        let pos = (e.offsetX / this.offsetWidth);
+        musicPlayer.currentTime = pos * musicPlayer.duration;
+    });
+		function toggleRepeat() {
+    let btnRepeat = document.getElementById('btnRepeat');
+
+    
+    if (musicPlayer.getAttribute('loop') === 'true') {
+        musicPlayer.removeAttribute('loop');
+        console.log("Repeat mode disabled");
+        btnRepeat.style.color = ''; 
+    } else {
+        musicPlayer.setAttribute('loop', 'true');
+        musicPlayer.currentTime = 0; 
+        console.log("Repeat mode enabled");
+        btnRepeat.style.color = 'blue'; 
+    }
+}
+
+
+
+function increaseVolume() {
+    let musicPlayer = document.getElementById('musicPlayer');
+    let increaseAmount = 0.1; 
+
+    
+    if (musicPlayer.volume > 0.5) {
+        increaseAmount = 0.05; 
+    }
+
+    if (musicPlayer.volume < 1) {
+        musicPlayer.volume += increaseAmount;
+    }
+
+    if (musicPlayer.volume > 1) {
+        musicPlayer.volume = 1; 
+    }
+}
+
+
+function decreaseVolume() {
+    let musicPlayer = document.getElementById('musicPlayer');
+    let decreaseAmount = 0.1; 
+
+    
+    if (musicPlayer.volume < 0.5) {
+        decreaseAmount = 0.05; 
+    }
+
+    if (musicPlayer.volume > 0) {
+        musicPlayer.volume -= decreaseAmount;
+    }
+
+    if (musicPlayer.volume < 0) {
+        musicPlayer.volume = 0; 
+    }
+}
+
+
+function toggleMute() {
+    let musicPlayer = document.getElementById('musicPlayer');
+    let btnMute = document.getElementById('btnMute');
+
+    if (musicPlayer.muted) {
+        musicPlayer.muted = false; 
+        btnMute.innerHTML = "&#x1F508;"; 
+    } else {
+        musicPlayer.muted = true; 
+        btnMute.innerHTML = "&#x1F507;"; 
+    }
+}
+
+
+
+    </script>
+	
+  </body>
+</html>
